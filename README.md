@@ -1,23 +1,23 @@
 sockets-for-cordova
 ===================
-This Cordova plugin provides JavaScript API, that allows you to communicate with server through TCP protocol. It is working with Capacitor 3. It is based on the blochop's cordova plugin https://github.com/blocshop/sockets-for-cordova
+This Cordova plugin provides JavaScript API, that allows you to communicate with server through TCP protocol.
 
 Currently we support these platforms: iOS, Android, WP8.
 
+You can also get information about this plugin from our blog post http://www.blocshop.cz/blog/?p=6
 
 ## Installation
 
 Install this plugin simply by:
 
-`npm i @vendus/sockets-for-cordova --save`
+`cordova plugin add cz.blocshop.socketsforcordova`
+
+or you can use GIT repository for most recent version:
+
+`cordova plugin add https://github.com/blocshop/sockets-for-cordova`
 
 ## Sample usage
-Here is simple example of how to connect to remote server, consume data from it and close the connection. This example uses React with TypeScript.
-
-Import the package:
-```
-import Socket from '@vendus/sockets-for-cordova';
-```
+Here is simple example of how to connect to remote server, consume data from it and close the connection.
 
 Create instance of Socket type:
 ```
@@ -61,7 +61,7 @@ socket.write(data);
 
 Close the connection gracefully by sending FIN to server:
 ```
-socket.shutdownWrite();  
+socket.shutdownWrite();
 ```
 
 or close the connection immediately:
@@ -102,37 +102,37 @@ if (socket.state == Socket.State.OPENED) {
 #### `open(host, port, onSuccess?, onError?): void`
 Establishes connection with the remote host.
 
-| parameter   | type          | description |
-| ----------- |-----------------------------|--------------|
-| `host`      | `string`                    | Remote host/ip address |
-| `port`      | `number`                    | Tcp port number |
-| `onSuccess` | `() => void`                | Success callback - called after successfull connection to the remote host. (optional)|
-| `onError`   | `(message: string) => void` | Error callback - called when some error occurs during connecting to the remote host. (optional)|
+| parameter   | type                        | description                                                                                     |
+| ----------- | --------------------------- | ----------------------------------------------------------------------------------------------- |
+| `host`      | `string`                    | Remote host/ip address                                                                          |
+| `port`      | `number`                    | Tcp port number                                                                                 |
+| `onSuccess` | `() => void`                | Success callback - called after successfull connection to the remote host. (optional)           |
+| `onError`   | `(message: string) => void` | Error callback - called when some error occurs during connecting to the remote host. (optional) |
 
 #### `write(data, onSuccess?, onError?): void`
 Sends data to remote host.
 
-| parameter   | type          | description |
-| ----------- |-----------------------------|--------------|
-| `data`      | `Uint8Array`                | Typed array of bytes, that will be written to output stream. |
-| `onSuccess` | `() => void`                | Success callback - called after data are successfully written to the output stream. (optional)|
-| `onError`   | `(message: string) => void` | Error callback - called when some error occurs during writing of data to the output stream. (optional)|
+| parameter   | type                        | description                                                                                            |
+| ----------- | --------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `data`      | `Uint8Array`                | Typed array of bytes, that will be written to output stream.                                           |
+| `onSuccess` | `() => void`                | Success callback - called after data are successfully written to the output stream. (optional)         |
+| `onError`   | `(message: string) => void` | Error callback - called when some error occurs during writing of data to the output stream. (optional) |
 
 #### `shutdownWrite(onSuccess?, onError?): void`
 Sends `FIN` to remote host and finishes data sending. You cannot call `write` method after you call `shutdownWrite`, otherwise `onError` callback (of `write` method) will be called.
 
-| parameter   | type          | description |
-| ----------- |-----------------------------|--------------|
-| `onSuccess` | `() => void`                | Success callback - called after sending of data is finished. (optional)|
-| `onError`   | `(message: string) => void` | Error callback - called when some error occurs during this procedure. (optional)|
+| parameter   | type                        | description                                                                      |
+| ----------- | --------------------------- | -------------------------------------------------------------------------------- |
+| `onSuccess` | `() => void`                | Success callback - called after sending of data is finished. (optional)          |
+| `onError`   | `(message: string) => void` | Error callback - called when some error occurs during this procedure. (optional) |
 
 #### `close(onSuccess?, onError?): void`
 Closes the connection. `onClose` event handler is called when connection is successfuly closed.
 
-| parameter   | type          | description |
-| ----------- |-----------------------------|--------------|
-| `onSuccess` | `() => void`                | Success callback, called after connection is successfully closed. `onClose` event handler is called before that callback. (optional)|
-| `onError`   | `(message: string) => void` | Error callback, called when some error occurs during this procedure. (optional)|
+| parameter   | type                        | description                                                                                                                          |
+| ----------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `onSuccess` | `() => void`                | Success callback, called after connection is successfully closed. `onClose` event handler is called before that callback. (optional) |
+| `onError`   | `(message: string) => void` | Error callback, called when some error occurs during this procedure. (optional)                                                      |
 
 ## BSD License
 Copyright (c) 2015, Blocshop s.r.o.
@@ -155,18 +155,13 @@ DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
 LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
 ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## What's new
- - 1.2.3 - fixed iOS socket closing crashes [iOS]
- - 1.5.0 - added iOS open and write timeouts, changed js errors format [iOS]
- - 1.5.1 - fixed cordova js bridge implementation [js]
- - 1.5.2 - fixed iOS open timeout [iOS]
- - 1.5.3 - added Android open and write timeouts [Android]
- - 1.5.4 - fixed iOS closing sockets on open timeout [iOS]
- - 1.6.0 - close old existing sockets on reopen by destination ports. Removed iOS trash sources [iOS, Android]
- - 1.7.0 - added codes to error handlers [iOS, Android]
- - 1.7.1 - error handler bugfixes [Android]
- - 1.7.2 - working with Capacitor 3 and TypeScript
-  
-Nexperience LDA, 2021  
+ - 1.2.3 - fixed iOS socket closing crashes
+ - 1.5.0 - added iOS open and write timeouts, changed js errors format
+ - 1.5.1 - fixed cordova js bridge implementation
+ - 1.5.2 - fixed iOS open timeout
+ - 1.5.3 - added Android open and write timeouts
+ - 1.5.4 - fixed iOS closing sockets on open timeout
+ - 1.5.5 - reverted "added Android open and write timeouts"

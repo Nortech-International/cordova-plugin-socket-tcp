@@ -30,11 +30,7 @@ int writeTimeoutSeconds = 5.0;
 
 @implementation SocketAdapter
 
-    dispatch_queue_t write_queue;
-
 - (void)open:(NSString *)host port:(NSNumber*)port {
-
-    write_queue = dispatch_queue_create("socket_write_queue", DISPATCH_QUEUE_SERIAL);
 
     CFReadStreamRef readStream2;
     CFWriteStreamRef writeStream2;
@@ -73,14 +69,14 @@ int writeTimeoutSeconds = 5.0;
 -(void)onOpenTimeout:(NSTimer *)timer {
     NSLog(@"[NATIVE] Open timeout: %d", openTimeoutSeconds);
     //self.errorEventHandler(@"Socket open timeout", @"openTimeout");
-    self.openErrorEventHandler(@"Socket open timeout", 0);
+    self.openErrorEventHandler(@"Socket open timeout");
     openTimer = nil;
     [self close];
 }
 
 -(void)onWriteTimeout:(NSTimer *)timer {
     NSLog(@"[NATIVE] Write timeout: %d", writeTimeoutSeconds);
-    self.errorEventHandler(@"Socket write timeout", @"writeTimeout", 0);
+    self.errorEventHandler(@"Socket write timeout", @"writeTimeout");
     writeTimer = nil;
 }
 
@@ -203,23 +199,13 @@ int writeTimeoutSeconds = 5.0;
         {
             NSLog(@"[NATIVE] Stream event error: %@", [[stream streamError] localizedDescription]);
 
-            NSInteger code = [[stream streamError] code];
-
             if (wasOpenned) {
-                self.errorEventHandler([[stream streamError] localizedDescription], @"general", code);
-                self.openErrorEventHandler([[stream streamError] localizedDescription],
-                    code);
-                if(openTimer != nil){
-                    NSLog(@"[NATIVE] openTimer invalidate on open event");
-                    [openTimer invalidate];
-                    openTimer = nil;
-                }
+                self.errorEventHandler([[stream streamError] localizedDescription], @"general");
                 self.closeEventHandler(TRUE);
             }
             else {
-                self.errorEventHandler([[stream streamError] localizedDescription], @"general", code);
-                self.openErrorEventHandler([[stream streamError] localizedDescription],
-                    code);
+                self.errorEventHandler([[stream streamError] localizedDescription], @"general");
+                self.openErrorEventHandler([[stream streamError] localizedDescription]);
             }
             //[self closeStreams];
             break;
@@ -232,19 +218,23 @@ int writeTimeoutSeconds = 5.0;
 }
 
 - (void)write:(NSArray *)dataArray {
-    dispatch_sync(write_queue, ^{
-        int numberOfBatches = ceil((float)dataArray.count / (float)WRITE_BUFFER_SIZE);
-        for (int i = 0; i < (numberOfBatches - 1); i++) {
-            [self writeSubarray:dataArray offset:i * WRITE_BUFFER_SIZE length:WRITE_BUFFER_SIZE];
-        }
-        int lastBatchPosition = (numberOfBatches - 1) * WRITE_BUFFER_SIZE;
+    int numberOfBatches = ceil((float)dataArray.count / (float)WRITE_BUFFER_SIZE);
+    for (int i = 0; i < (numberOfBatches - 1); i++) {
+        [self writeSubarray:dataArray offset:i * WRITE_BUFFER_SIZE length:WRITE_BUFFER_SIZE];
+    }
+    int lastBatchPosition = (numberOfBatches - 1) * WRITE_BUFFER_SIZE;
 
-        NSTimer *timer = [NSTimer timerWithTimeInterval:writeTimeoutSeconds target:self selector:@selector(onWriteTimeout:) userInfo:nil repeats:NO];
-        [[NSRunLoop mainRunLoop] addTimer:timer forMode:NSDefaultRunLoopMode];
-        writeTimer = timer;
+    if(writeTimer != nil){
+        [writeTimer invalidate];
+        NSLog(@"[NATIVE] writeTimer invalidate on re-entrant write");
+    }
 
-        [self writeSubarray:dataArray offset:lastBatchPosition length:(dataArray.count - lastBatchPosition)];
-    });
+    NSTimer *timer = [NSTimer timerWithTimeInterval:writeTimeoutSeconds target:self selector:@selector(onWriteTimeout:) userInfo:nil repeats:NO];
+    [[NSRunLoop mainRunLoop] addTimer:timer forMode:NSDefaultRunLoopMode];
+    
+    writeTimer = timer;
+
+    [self writeSubarray:dataArray offset:lastBatchPosition length:(dataArray.count - lastBatchPosition)];
 }
 
 - (void)writeSubarray:(NSArray *)dataArray offset:(long)offset length:(long)length {
@@ -263,8 +253,8 @@ int writeTimeoutSeconds = 5.0;
 }
 
 - (void)close {
-    [self closeStreams];
     self.closeEventHandler(FALSE);
+    [self closeStreams];
 }
 
 - (void)closeStreams {
